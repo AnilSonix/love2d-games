@@ -6,6 +6,9 @@ function Home:new()
     return obj
 end
 function Home:enter(enterParams)
+    score1 = 0
+    score2 = 0
+    player1Serving = true
 end
 function Home:update(dt)
     if love.keyboard.wasPressed("enter") or love.keyboard.wasPressed("return") then

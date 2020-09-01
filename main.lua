@@ -1,6 +1,7 @@
 require("src.StateMachine")
 require("src.states.Home")
 require("src.states.Play")
+require("src.states.Score")
 
 local push = require("libs.push")
 pprint = require("libs.pprint")
@@ -14,6 +15,10 @@ function love.load()
     VIRTUAL_WIDTH = 512
     VIRTUAL_HEIGHT = 288
 
+    score1 = 0
+    score2 = 0
+    player1Serving = true
+
     gStateMachine =
         StateMachine:new(
         {
@@ -22,6 +27,9 @@ function love.load()
             end,
             ["play"] = function()
                 return Play:new()
+            end,
+            ["score"] = function()
+                return Score:new()
             end
         }
     )
@@ -31,6 +39,12 @@ function love.load()
         ["large"] = love.graphics.newFont("assets/fonts/font.ttf", 32),
         ["medium"] = love.graphics.newFont("assets/fonts/font.ttf", 16),
         ["small"] = love.graphics.newFont("assets/fonts/font.ttf", 8)
+    }
+
+    gAudio = {
+        ["paddleHit"] = love.audio.newSource("assets/audio/paddle_hit.wav", "static"),
+        ["score"] = love.audio.newSource("assets/audio/score.wav", "static"),
+        ["wallHit"] = love.audio.newSource("assets/audio/wall_hit.wav", "static")
     }
 
     love.keyboard.keysPressed = {}

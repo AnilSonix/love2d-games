@@ -14,7 +14,11 @@ function Play:new()
     return obj
 end
 function Play:enter(enterParams)
-    self.ball.dx = math.random(2) == 1 and math.random(50, 80) or -math.random(50, 80)
+    if player1Serving then
+        self.ball.dx = math.random(50, 80)
+    else
+        self.ball.dx = -math.random(50, 80)
+    end
     self.ball.dy = math.random(2) == 1 and math.random(50, 80) or -math.random(50, 80)
 end
 function Play:update(dt)
@@ -65,6 +69,7 @@ function Play:update(dt)
         else
             self.ball.dy = math.random(10, 150)
         end
+        gAudio["paddleHit"]:play()
     end
 
     if AABB(ball, paddle2) then
@@ -76,26 +81,40 @@ function Play:update(dt)
         else
             self.ball.dy = math.random(10, 150)
         end
+        gAudio["paddleHit"]:play()
     end
 
     -- ball and paddle dont hit
     if self.ball.x < -Ball.width then
+        score2 = score2 + 1
+        player1Serving = true
         gStateMachine:change("play")
+        gAudio["score"]:play()
     end
 
     if self.ball.x > VIRTUAL_WIDTH then
+        score1 = score1 + 1
+        player1Serving = false
         gStateMachine:change("play")
+        gAudio["score"]:play()
     end
 
     -- bounce ball if collides with top or bottom screen
     if self.ball.y < 0 then
         self.ball.y = 0
         self.ball.dy = -self.ball.dy
+        gAudio["wallHit"]:play()
     end
 
     if self.ball.y + Ball.width > VIRTUAL_HEIGHT then
         self.ball.y = VIRTUAL_HEIGHT - Ball.width
         self.ball.dy = -self.ball.dy
+        gAudio["wallHit"]:play()
+    end
+
+    -- check scores
+    if score1 == 5 or score2 == 5 then
+        gStateMachine:change("score")
     end
 
     self.ball:update(dt)
@@ -106,6 +125,15 @@ function Play:render()
     self.ball:render()
     self.paddle1:render()
     self.paddle2:render()
+
+    love.graphics.setColor(255, 255, 255)
+    love.graphics.setFont(gFonts.large)
+    love.graphics.printf(tostring(score1), 0, VIRTUAL_HEIGHT / 3, VIRTUAL_WIDTH / 2, "center")
+    love.graphics.printf(tostring(score2), VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT / 3, VIRTUAL_WIDTH / 2, "center")
+
+    love.graphics.setColor(0, 255, 255)
+    love.graphics.setFont(gFonts.medium)
+    love.graphics.printf(player1Serving and "Player 1" or "Player 2", 0, 20, VIRTUAL_WIDTH, "center")
 end
 function Play:exit()
 end
